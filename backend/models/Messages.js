@@ -22,10 +22,6 @@ const Messages = sequelize.define(
       type: DataTypes.INTEGER,
       allowNull: true, // Grup mesajları için null olabilir
     },
-    chatId: {
-      type: DataTypes.INTEGER,
-      allowNull: true, // Bireysel mesajlar için null olabilir
-    },
     isRead: {
       type: DataTypes.BOOLEAN,
       defaultValue: false,

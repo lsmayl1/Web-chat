@@ -6,6 +6,7 @@ const { Server } = require("socket.io");
 const sequelize = require("./database/db");
 const authRoute = require("./routes/authRoute");
 const usersRoute = require("./routes/usersRoute");
+const messageRoute = require("./routes/messageRoute");
 const { Users, Messages } = require("./models/index");
 const socketHandler = require("./socket");
 
@@ -17,12 +18,22 @@ app.use(express.json());
 
 app.use("/auth", authRoute);
 app.use("/users", usersRoute);
+app.use("/messages", messageRoute);
 
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
     origin: "*",
+    methods: ["GET", "POST"],
   },
+});
+
+app.use((err, req, res, next) => {
+  // Eğer hata özel bir statusCode içeriyorsa, onu kullan
+  const statusCode = err.statusCode || 500;
+  const message = err.message || "Internal server error";
+
+  res.status(statusCode).json({ message });
 });
 
 socketHandler(io);

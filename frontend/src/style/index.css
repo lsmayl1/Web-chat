@@ -1,1 +1,8 @@
 @import "tailwindcss";
+
+@theme {
+  --color-mainBg: #242424;
+  --color-secondaryBg: #1b1b1b;
+  --color-receiverMessageBg: #36383c;
+  --color-senderMessageBg: #268d61;
+}

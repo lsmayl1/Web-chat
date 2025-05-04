@@ -1,69 +1,67 @@
-const { getById } = require("../services/userService");
 const { Users, Messages } = require("../models/index");
+const { Op } = require("sequelize");
 
 module.exports = (io, socket) => {
-  // Identify user
-  socket.on("identifyUser", async (userId) => {
+  // MESAJ GÖNDERME
+  socket.on("sendMessage", async ({ receiverId, content }, callback) => {
     try {
-      const user = await getById(userId);
-      if (!user) {
-        socket.emit("userNotFound", "User not found");
-        return;
+      if (!receiverId || !content) {
+        return callback({
+          success: false,
+          message: "message is empty",
+        });
       }
-      socket.user = user; // Store user object in socket
-      socket.join(`user:${user.id}`); // Join user-specific room
-      io.emit("userIdentified", { id: user.id, username: user.username });
-      console.log("User identified:", user);
-    } catch (error) {
-      console.error("Error identifying user:", error);
-      socket.emit("error", "An error occurred while identifying the user");
+      const senderId = socket.user.id;
+      console.log("Mesaj gönderiliyor:", { senderId, receiverId, content });
+
+      const message = await Messages.create({
+        senderId,
+        receiverId,
+        content,
+        isRead: false,
+      });
+
+      io.to(`user:${receiverId}`).emit("receiveMessage", message);
+
+      callback({ success: true, message });
+    } catch (err) {
+      console.error("sendMessage error:", err);
+      callback({ success: false, message: "Server error" });
     }
   });
 
-  // Handle sending messages
-  socket.on(
-    "sendMessage",
-    async ({ content, receiverId, chatId }, callback) => {
-      try {
-        if (!socket.user) {
-          throw new Error("User not identified");
-        }
+  // MESAJ GEÇMİŞİNİ GETİRME
+  socket.on("getMessagesWithUser", async ({ receiverId }, callback) => {
+    try {
+      const senderId = socket.user.id;
 
-        // Save message to database
-        const message = await Messages.create({
-          content,
-          senderId: socket.user.id,
-          receiverId: receiverId || null,
-          chatId: chatId || null,
-          isRead: false,
-        });
+      const user2 = await Users.findByPk(receiverId, {
+        attributes: ["user_id", "username"],
+      });
 
-        // Fetch populated message with sender and receiver details
-        const populatedMessage = await Messages.findOne({
-          where: { id: message.id },
-          include: [
-            { model: Users, as: "sender", attributes: ["id", "username"] },
-            { model: Users, as: "receiver", attributes: ["id", "username"] },
-          ],
-        });
-
-        // Emit message to sender and receiver
-        if (receiverId) {
-          io.to(`user:${socket.user.id}`)
-            .to(`user:${receiverId}`)
-            .emit("receiveMessage", populatedMessage);
-        } else {
-          io.to(`user:${socket.user.id}`).emit(
-            "receiveMessage",
-            populatedMessage
-          );
-        }
-
-        callback({ success: true, message: populatedMessage });
-      } catch (error) {
-        console.error("Error sending message:", error.message);
-        callback({ success: false, message: error.message });
+      if (!user2) {
+        return callback({ success: false, message: "User not found" });
       }
+
+      const messages = await Messages.findAll({
+        where: {
+          [Op.or]: [
+            { senderId, receiverId },
+            { senderId: receiverId, receiverId: senderId },
+          ],
+        },
+        order: [["createdAt", "ASC"]],
+        attributes: ["id", "senderId", "receiverId", "content", "createdAt"],
+      });
+
+      callback({
+        success: true,
+        user: user2,
+        messages,
+      });
+    } catch (err) {
+      console.error("getMessagesWithUser error:", err);
+      callback({ success: false, message: "Server error" });
     }
-  );
+  });
 };

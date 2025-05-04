@@ -26,3 +26,29 @@ export interface LoginDto {
 	username?:string,
 	password?:string,
 }
+
+export interface RequestMessageDto {
+	receiver_id?:string,
+	content?:string,
+}
+
+export interface ResponseMessageDto {
+	success?:boolean,
+	status?:boolean,
+	message?:string,
+	user:{
+		user_id?:string,
+		username?:string,
+	},
+	messages:[
+		{
+			id?:string,
+			senderId?:string,
+			receiverId?:string,
+			content?:string,
+			createdAt?:string,
+		}
+	]
+
+
+}

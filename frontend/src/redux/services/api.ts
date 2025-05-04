@@ -4,7 +4,7 @@ import { getCookie } from '../../utils/cookie';
 export const api = createApi({
   reducerPath: 'api',
   baseQuery:fetchBaseQuery({
-	  baseUrl: `http://localhost:3000/`,
+	  baseUrl: `http://192.168.1.67:3000/`,
 	  prepareHeaders: (headers) => {
 		const token = getCookie("access_token");
 		if (token) {
@@ -34,7 +34,29 @@ export const api = createApi({
 			method:'GET',
 		})
   }),
-  }),
+ 	 GetUsers:builder.query({
+		query:()=>({
+		url:'/users/withoutme',
+		method:'GET',
+	})
+	}),
+
+	SendMessage:builder.mutation({
+		query:(message)=>({
+			url:'/messages',
+			method:'POST',
+			body:message,
+		})
+	}),
+
+	GetMessages:builder.query({
+		query:(id)=>({
+			url:`/messages/${id}`,
+			method:'GET',
+		})
+	}),
+
+})
 });
 
-export const { useLoginMutation,useRegisterMutation,useMeQuery} = api;
+export const { useLoginMutation,useRegisterMutation,useMeQuery,useGetUsersQuery,useSendMessageMutation} = api;

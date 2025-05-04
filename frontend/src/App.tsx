@@ -2,7 +2,7 @@ import { Route, Routes, useNavigate } from "react-router-dom";
 import { SignUp } from "./pages/SignUp.tsx";
 import { SignIn } from "./pages/SignIn.tsx";
 import { PrivateRoute } from "./Routes/PrivateRoute.tsx";
-import { Chat } from "./pages/Chat.tsx";
+import { Chat } from "./components/Chat/Chat.tsx";
 import { useDispatch, useSelector } from "react-redux";
 import { useMeQuery } from "./redux/services/api.ts";
 import { useEffect } from "react";
@@ -39,7 +39,9 @@ function App() {
 
       <Route element={<PrivateRoute allowedRoles={["Admin", "user"]} />}>
         <Route element={<Layout />}>
-          <Route path="/chat" element={<Chat />} />
+          <Route path="/chat" element={<Chat />}>
+            <Route path=":id" element={<Chat />} />
+          </Route>
         </Route>
       </Route>
     </Routes>
