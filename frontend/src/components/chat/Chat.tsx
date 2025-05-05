@@ -20,6 +20,17 @@ export const Chat: React.FC = () => {
     content: "",
     isRead: true,
   });
+
+  const {socket, error} = useSocketConnection({
+    id,
+    onSuccess(){
+
+    },
+    onError(error){
+
+    }
+  })
+
   const [socketError, setSocketError] = useState(null);
   // Get Messages
   useEffect(() => {
@@ -43,6 +54,7 @@ export const Chat: React.FC = () => {
       };
     }
   }, [token, id]);
+
   useEffect(() => {
     if (socket) {
       socket.on("receiveMessage", (message) => {

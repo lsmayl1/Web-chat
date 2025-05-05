@@ -1,10 +1,11 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import { getCookie } from '../../utils/cookie';
+import { Meta } from 'react-router-dom';
 
 export const api = createApi({
   reducerPath: 'api',
   baseQuery:fetchBaseQuery({
-	  baseUrl: `http://192.168.1.67:3000/`,
+	  baseUrl: import.meta.env.VITE_API_URL,
 	  prepareHeaders: (headers) => {
 		const token = getCookie("access_token");
 		if (token) {

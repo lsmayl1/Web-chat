@@ -1,7 +1,7 @@
 // socket.js
 import { io } from "socket.io-client";
 
-const ENDPOINT = "http://192.168.1.67:3000";
+const ENDPOINT =import.meta.env.VITE_API_URL
 
 const createSocket = (token: string) => {
   return io(ENDPOINT, {
