@@ -155,7 +155,7 @@ export const SignIn = () => {
               type="submit"
               className="w-full bg-blue-700 rounded-xl text-white py-2 cursor-pointer mt-4"
             >
-              Sign In
+              {isLoading ? "Loading..." : "SignIn"}
             </button>
           </form>
         </div>

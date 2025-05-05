@@ -1,16 +1,35 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { getCookie, saveTokensToCookie } from "../../utils/cookie";
 
+type User = {
+	user_id:string;
+	username:string;
+	email:string;
+	role:string;
+	createdAt:string;
+	updatedAt:string;
+}
+
+interface AuthState {
+	user: User | null;
+	access_token: string | null;
+	refresh_token: string | null;
+	user_role: string;
+	isLoading: boolean;
+  }
+
+  const initialState: AuthState = {
+	user: null,
+	access_token: getCookie("access_token") || null,
+	refresh_token: getCookie("refresh_token") || null,
+	user_role: "",
+	isLoading: true,
+  };
+
+
 const AuthSlice = createSlice({
 	name:"auth",
-	initialState:{
-		user:null,
-		access_token: getCookie("access_token") || null,
-		refresh_token: getCookie("refresh_token") || null,
-		user_role:"",
-		isLoading:true
-
-	},
+	initialState,
 	reducers:{
 		setToken:(state,action)=>{
 			state.access_token = action.payload.access_token;

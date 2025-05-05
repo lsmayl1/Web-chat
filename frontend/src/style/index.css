@@ -5,4 +5,15 @@
   --color-secondaryBg: #1b1b1b;
   --color-receiverMessageBg: #36383c;
   --color-senderMessageBg: #268d61;
+  --breakpoint-mm: 375px;
+  --breakpoint-xs: 480px;
+  --breakpoint-sm: 640px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1280px;
+  --breakpoint-2xl: 1536px;
+  --text-md: 1rem;
+  --text-flg: 0.9rem;
+  --text-fsm: 0.6rem;
+  --text-fxs: 0.45rem;
 }

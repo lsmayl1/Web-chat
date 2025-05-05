@@ -1,6 +1,6 @@
-import React from "react";
+import { Props } from "../types";
 
-export const SearchIcon = (prop) => {
+export const SearchIcon = (prop: Props) => {
   return (
     <svg
       className={prop.className}

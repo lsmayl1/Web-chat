@@ -52,3 +52,8 @@ export interface ResponseMessageDto {
 
 
 }
+
+
+export type Props = {
+	className?: string;
+  };

@@ -1,4 +1,6 @@
-export const SendIcon = (prop) => {
+import { Props } from "../types";
+
+export const SendIcon = (prop: Props) => {
   return (
     <svg
       width="50px"

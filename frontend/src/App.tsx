@@ -1,4 +1,4 @@
-import { Route, Routes, useNavigate } from "react-router-dom";
+import { Route, Routes } from "react-router-dom";
 import { SignUp } from "./pages/SignUp.tsx";
 import { SignIn } from "./pages/SignIn.tsx";
 import { PrivateRoute } from "./Routes/PrivateRoute.tsx";
@@ -9,8 +9,9 @@ import { useEffect } from "react";
 import { setUser } from "./redux/services/authSlice.ts";
 import { AuthRoute } from "./Routes/AuthRoute.tsx";
 import { Layout } from "./components/Layout/Layout.tsx";
+import { RootState } from "./redux/store.ts";
 function App() {
-  const { access_token } = useSelector((state) => state.auth);
+  const { access_token } = useSelector((state: RootState) => state.auth);
   const dispatch = useDispatch();
   const { data, isLoading, isSuccess } = useMeQuery(undefined, {
     skip: !access_token,

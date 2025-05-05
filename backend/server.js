@@ -9,6 +9,8 @@ const usersRoute = require("./routes/usersRoute");
 const messageRoute = require("./routes/messageRoute");
 const { Users, Messages } = require("./models/index");
 const socketHandler = require("./socket");
+const bodyParser = require("body-parser");
+const path = require("path");
 
 const app = express();
 
@@ -19,6 +21,15 @@ app.use(express.json());
 app.use("/auth", authRoute);
 app.use("/users", usersRoute);
 app.use("/messages", messageRoute);
+
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+// app.use(express.static(path.join(__dirname, "../frontend/dist")));
+
+// // Tüm istekleri index.html'e yönlendir (React Router için)
+// app.get("*", (req, res) => {
+//   res.sendFile(path.join(__dirname, "../frontend/dist", "index.html"));
+// });
 
 const server = http.createServer(app);
 const io = new Server(server, {

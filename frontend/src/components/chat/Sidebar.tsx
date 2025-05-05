@@ -1,10 +1,16 @@
 import React from "react";
 import { useGetUsersQuery } from "../../redux/services/api";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { SearchIcon } from "../../assets/SearchIcon";
 
+type User = {
+  user_id?: number;
+  username?: string;
+};
+
 export const Sidebar = () => {
-  const { data: users } = useGetUsersQuery();
+  const { data: users } = useGetUsersQuery(undefined);
+  const { id } = useParams();
   const navigate = useNavigate();
   const data = {
     name: "Ismayil",
@@ -16,7 +22,11 @@ export const Sidebar = () => {
   };
 
   return (
-    <div className="flex bg-mainBg w-1/4 h-full flex-col gap-4 py-4">
+    <div
+      className={`flex bg-mainBg w-1/4 h-full flex-col gap-4 py-4 max-md:w-full max-md:${
+        id ? "hidden" : "block"
+      }`}
+    >
       <div className="px-4 flex relative items-center">
         <span className="absolute pl-2">
           <SearchIcon className={"text-[#96989C] size-6"} />
@@ -28,33 +38,29 @@ export const Sidebar = () => {
         />
       </div>
       <ul className="flex flex-col ">
-        {users?.map((user) => (
+        {users?.map((user: User) => (
           <li
             key={user.user_id}
             onClick={() => navigate(`/chat/${user.user_id}`)}
             className="w-full hover:bg-[#35373B]  cursor-pointer  flex flex-col  py-2 px-4 "
           >
-            <div className="flex w-full  py-2 items-center ">
-              <div className="w-1/4   overflow-hidden rounded-full">
+            <div className="flex w-full h-auto  py-2 items-center ">
+              <div className="size-14 max-lg:size-10  overflow-hidden aspect-square rounded-full flex items-center justify-center">
                 <img
                   src={data?.avatar}
-                  className="w-full h-full object-center"
+                  className="w-full h-full object-cover "
                   alt=""
                 />
               </div>
-              <div className="flex flex-col gap-2 w-full px-4">
+              <div className="flex flex-1 flex-col gap-2 w-full px-4">
                 <div className="flex justify-between w-full items-center">
                   <span className="text-lg text-white font-medium">
                     {user.username}
                   </span>
-                  <span className="text-[#838383] text-sm">4:30 PM</span>
-                </div>
-                {/* <div className="flex justify-between w-full items-center">
-                  <span className="">{data.lastMessage}</span>
-                  <span className="bg-blue-500 rounded-full px-2 text-white">
-                    {data.unreadCount}
+                  <span className="text-[#838383] text-sm max-lg:text-xs">
+                    4:30 PM
                   </span>
-                </div> */}
+                </div>
               </div>
             </div>
           </li>

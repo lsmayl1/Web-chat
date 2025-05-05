@@ -1,12 +1,12 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useSelector } from "react-redux";
-import { useParams } from "react-router-dom";
+import { NavLink, useParams } from "react-router-dom";
 import createSocket from "../../socket/socket";
 import { ResponseMessageDto } from "../../types";
 import { RootState } from "../../redux/store";
 import { SendIcon } from "../../assets/SendIcon";
 import { toast, ToastContainer } from "react-toastify";
-
+import { LeftArrow } from "../../assets/LeftArrow";
 export const Chat: React.FC = () => {
   const { id } = useParams();
   const { access_token: token, user } = useSelector(
@@ -14,7 +14,7 @@ export const Chat: React.FC = () => {
   );
   const [data, setData] = useState<ResponseMessageDto | null>(null);
   const [socket, setSocket] = useState(null);
-  const scrollRef = useRef(null);
+  const scrollRef = useRef<HTMLDivElement | null>(null);
   const [messageForm, setMessageForm] = useState({
     receiver_id: id,
     content: "",
@@ -107,8 +107,15 @@ export const Chat: React.FC = () => {
     <>
       <ToastContainer />
       {id ? (
-        <div className="flex flex-col h-full flex-1 justify-end bg-secondaryBg">
+        <div
+          className={`flex flex-col h-full flex-1 justify-end bg-secondaryBg ${
+            !id && "max-md:hidden"
+          } `}
+        >
           <div className="h-1/10  flex items-center px-4  bg-mainBg">
+            <NavLink to={"/chat"} className={"md:hidden"}>
+              <LeftArrow />{" "}
+            </NavLink>
             <span className="text-2xl font-medium text-white ">
               {data?.user?.username}
             </span>
@@ -167,13 +174,16 @@ export const Chat: React.FC = () => {
               placeholder="Your messages..."
               className="placeholder:text-md w-full px-4 py-2 rounded-xl text-xl bg-[#35373A] focus:outline-none text-white"
             />
-            <button className="absolute right-6" onClick={() => handleSendMessage()}>
+            <button
+              className="absolute right-6"
+              onClick={() => handleSendMessage()}
+            >
               <SendIcon className={"size-8 text-white"} />
             </button>
           </div>
         </div>
       ) : (
-        <div className="bg-[#1B1B1B] flex-1 flex items-center justify-center text-white text-2xl ">
+        <div className="bg-[#1B1B1B] flex-1 flex items-center max-md:hidden justify-center text-white text-2xl ">
           Welcome to Web Chat
         </div>
       )}
