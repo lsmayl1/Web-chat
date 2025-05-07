@@ -6,6 +6,7 @@ module.exports = (io, socket) => {
   socket.on("sendMessage", async ({ receiverId, content }, callback) => {
     try {
       if (!receiverId || !content) {
+        console.log("sendMessage error: receiverId or content is missing");
         return callback({
           success: false,
           message: "message is empty",

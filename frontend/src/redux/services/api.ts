@@ -1,6 +1,11 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import { getCookie } from '../../utils/cookie';
-import { Meta } from 'react-router-dom';
+import { setUser } from './authSlice';
+import { createAction } from '@reduxjs/toolkit';
+
+
+const setUserData = createAction("setUser")
+
 
 export const api = createApi({
   reducerPath: 'api',
@@ -33,7 +38,16 @@ export const api = createApi({
 		query:()=>({
 			url:'auth/me',
 			method:'GET',
-		})
+		}),
+		async onQueryStarted(_arg,{dispatch,queryFulfilled}){
+			try {
+				const {data} = queryFulfilled;
+				dispatch(setUserData(data))
+			} catch (error) {
+				console.log(error)
+			}
+		},
+		
   }),
  	 GetUsers:builder.query({
 		query:()=>({

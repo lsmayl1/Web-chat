@@ -1,101 +1,38 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useSelector } from "react-redux";
-import { NavLink, useParams } from "react-router-dom";
+import { NavLink, useParams, Outlet } from "react-router-dom";
 import createSocket from "../../socket/socket";
 import { ResponseMessageDto } from "../../types";
 import { RootState } from "../../redux/store";
 import { SendIcon } from "../../assets/SendIcon";
 import { toast, ToastContainer } from "react-toastify";
 import { LeftArrow } from "../../assets/LeftArrow";
+import { useMeQuery } from "../../redux/services/api";
+import { useSocket } from "../../hooks/useSocket";
 export const Chat: React.FC = () => {
   const { id } = useParams();
   const { access_token: token, user } = useSelector(
     (state: RootState) => state.auth
   );
+  const { isLoading } = useMeQuery(undefined, { skip: !token });
   const [data, setData] = useState<ResponseMessageDto | null>(null);
-  const [socket, setSocket] = useState(null);
   const scrollRef = useRef<HTMLDivElement | null>(null);
+  const { onSuccess, onError, GetMessages, SendMessage, receiveMessage } =
+    useSocket();
   const [messageForm, setMessageForm] = useState({
     receiver_id: id,
     content: "",
     isRead: true,
   });
 
-  const {socket, error} = useSocketConnection({
-    id,
-    onSuccess(){
-
-    },
-    onError(error){
-
-    }
-  })
-
-  const [socketError, setSocketError] = useState(null);
-  // Get Messages
   useEffect(() => {
-    if (token && id) {
-      const newSocket = createSocket(token);
-      setSocket(newSocket);
-      newSocket.emit(
-        "getMessagesWithUser",
-        { receiverId: id },
-        (response: ResponseMessageDto) => {
-          if (response.success) {
-            setData(response);
-          } else {
-            console.error("Mesajlar alınamadı:", response.message);
-          }
-        }
-      );
-
-      return () => {
-        newSocket.disconnect();
-      };
-    }
-  }, [token, id]);
-
-  useEffect(() => {
-    if (socket) {
-      socket.on("receiveMessage", (message) => {
-        console.log("Yeni mesaj alındı:", message);
-        setData((prev) => ({
-          ...prev,
-          messages: [...prev.messages, message],
-        }));
-      });
-
-      return () => {
-        socket.off("receiveMessage");
-      };
-    }
-  }, [socket]);
-
-  const handleSendMessage = () => {
-    if (socket && id) {
-      socket.emit(
-        "sendMessage",
-        {
-          receiverId: id,
-          content: messageForm.content,
-          isRead: true,
-        },
-        (response: ResponseMessageDto) => {
-          if (response.success) {
-            setData((prev: ResponseMessageDto | null) => ({
-              ...prev,
-              messages: [...prev?.messages, response?.message],
-            }));
-
-            setMessageForm((prev) => ({ ...prev, content: "" }));
-          } else {
-            setSocketError(response.message);
-            console.error("Mesaj gönderilemedi:", response.message);
-          }
-        }
-      );
-    }
-  };
+    onSuccess((data) => {
+      // toast.success(data.message);
+    });
+    onError((error) => {
+      toast.error(error?.message);
+    });
+  }, [onSuccess, onError, id]);
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -105,16 +42,39 @@ export const Chat: React.FC = () => {
 
   useEffect(() => {
     if (id) {
+      GetMessages(id, (data) => {
+        setData(data);
+      });
+      receiveMessage((data) => {
+        setData((prev) => ({
+          ...prev,
+          messages: [...prev.messages, data],
+        }));
+      });
       setMessageForm({ receiver_id: id, content: "", isRead: true });
     }
   }, [id]);
 
-  useEffect(() => {
-    if (socketError) {
-      toast.error(socketError);
-    }
-  }, [socketError]);
+  const handleSendMessage = () => {
+    if (id) {
+      SendMessage({ receiverId: id, content: messageForm.content }, (data) => {
+        console.log(data);
+        setData((prev) => {
+          if (!prev) return null; // veya başlangıç verisi
 
+          return {
+            ...prev,
+            messages: [...prev.messages, data],
+          };
+        });
+        setMessageForm((prev) => ({ ...prev, content: "" }));
+      });
+    }
+  };
+
+  if (isLoading) {
+    return <Outlet />;
+  }
   return (
     <>
       <ToastContainer />
@@ -141,7 +101,7 @@ export const Chat: React.FC = () => {
                 <div
                   key={index}
                   className={`flex ${
-                    message.senderId === user?.user_id
+                    message?.senderId === user?.user_id
                       ? "justify-end"
                       : "justify-start"
                   }  px-4`}
@@ -149,7 +109,7 @@ export const Chat: React.FC = () => {
                   <li className="flex flex-col gap-4 w-fit px-2 py-2 justify-end">
                     <div
                       className={`flex gap-4 flex-col  ${
-                        message.senderId === user?.user_id
+                        message?.senderId === user?.user_id
                           ? "bg-senderMessageBg"
                           : "bg-receiverMessageBg"
                       }  px-4 rounded-2xl py-2`}

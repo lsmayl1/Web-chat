@@ -8,6 +8,7 @@ module.exports = (io) => {
     const token = socket.handshake.auth?.token;
     if (!token) {
       console.log("Token yok. Bağlantı reddedildi.");
+      socket.emit("error", { message: "Token yok." });
       return socket.disconnect(true);
     }
 
@@ -17,8 +18,10 @@ module.exports = (io) => {
 
       if (!userId) {
         console.log("Geçersiz token içeriği.");
+        socket.emit("error", { message: "Geçersiz token." });
         return socket.disconnect(true);
       }
+      io.emit("success", { message: "Sockete baglandi" }); // Kullanıcı bağlandığında tüm kullanıcılara bildirim gönder
 
       socket.user = { id: userId };
 

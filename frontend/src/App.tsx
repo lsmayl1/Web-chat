@@ -21,15 +21,7 @@ function App() {
     if (data && isSuccess && !isLoading) {
       dispatch(setUser(data));
     }
-  });
-
-  if (isLoading) {
-    return (
-      <div className="flex h-screen w-full items-center justify-center">
-        <h1 className="font-poppins text-24">Loading...</h1>
-      </div>
-    );
-  }
+  }, [data, isLoading, isSuccess, dispatch]);
 
   return (
     <Routes>
