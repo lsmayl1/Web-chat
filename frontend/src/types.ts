@@ -27,6 +27,15 @@ export interface LoginDto {
 	password?:string,
 }
 
+export interface Messages {
+	id?:string,
+	senderId?:string,
+	receiverId?:string,
+	content?:string,
+	createdAt?:string | number,
+}
+
+
 export interface RequestMessageDto {
 	receiver_id?:string,
 	content?:string,
@@ -40,15 +49,7 @@ export interface ResponseMessageDto {
 		user_id?:string,
 		username?:string,
 	},
-	messages:[
-		{
-			id?:string,
-			senderId?:string,
-			receiverId?:string,
-			content?:string,
-			createdAt?:string,
-		}
-	]
+	messages:Messages[],
 
 
 }

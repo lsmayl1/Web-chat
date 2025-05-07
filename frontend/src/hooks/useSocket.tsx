@@ -1,18 +1,16 @@
-import React, { useEffect, useRef, useState } from "react";
+import  { useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "../redux/store";
 import createSocket from "../socket/socket";
 import { RequestMessageDto, ResponseMessageDto } from "../types";
-
+import  { Socket } from "socket.io-client";
+import  { ClientToServerEvents, ServerToClientEvents } from "../SocketEvents";
 export const useSocket = () => {
   const { access_token } = useSelector((state: RootState) => state.auth);
-  const socketRef = useRef(null);
-  const [socket, setSocket] = useState(null);
-  const [messages, setMessages] = useState<ResponseMessageDto[]>([]);
+  const socketRef = useRef<typeof Socket<ServerToClientEvents, ClientToServerEvents> | null>(null);
   useEffect(() => {
     if (access_token) {
       const newSocket = createSocket(access_token);
-      setSocket(newSocket);
       socketRef.current = newSocket;
       return () => {
         newSocket.disconnect();
@@ -44,7 +42,7 @@ export const useSocket = () => {
       }
     );
   };
-  const SendMessage = (request, callback: (message) => void) => {
+  const SendMessage = (request, callback: (message:RequestMessageDto) => void) => {
     socketRef.current?.emit("sendMessage", request, (response) => {
       if (response.success) {
         callback(response.message);
@@ -53,7 +51,7 @@ export const useSocket = () => {
       }
     });
   };
-  const receiveMessage = (callback: (data) => void) => {
+  const receiveMessage = (callback: (data:ResponseMessageDto) => void) => {
     socketRef.current?.on("receiveMessage", callback);
   };
 

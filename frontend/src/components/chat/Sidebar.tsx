@@ -41,7 +41,7 @@ export const Sidebar = () => {
         {users?.map((user: User) => (
           <li
             key={user.user_id}
-            onClick={() => navigate(`/chat/${user.user_id}`)}
+            onClick={() => navigate(`/chat/${user?.user_id}`)}
             className="w-full hover:bg-[#35373B]  cursor-pointer  flex flex-col  py-2 px-4 "
           >
             <div className="flex w-full h-auto  py-2 items-center ">
