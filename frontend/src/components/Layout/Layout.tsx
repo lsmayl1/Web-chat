@@ -1,5 +1,4 @@
-import React from "react";
-import { Sidebar } from "../Chat/Sidebar";  
+import { Sidebar } from "../chat/Sidebar";  
 import { Outlet } from "react-router-dom";
 import { useMeQuery } from "../../redux/services/api";
 import { useSelector } from "react-redux";
