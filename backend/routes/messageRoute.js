@@ -2,7 +2,7 @@ require("dotenv").config();
 const express = require("express");
 const router = express.Router();
 const jwt = require("jsonwebtoken");
-const { sendMessage } = require("../services/messageService");
+const { sendMessage, createMessage } = require("../services/messageService");
 const { getMessagesByReceiverId } = require("../services/messageService");
 const { Messages, Op, Users } = require("../models/index");
 // router.get("/:chatId", async (req, res) => {
@@ -17,25 +17,21 @@ const { Messages, Op, Users } = require("../models/index");
 // });
 
 router.post("/", async (req, res) => {
-  const token = req.headers.authorization?.split(" ")[1];
-  if (!token) {
-    return res.status(401).json({ message: "Token missing" });
+  const { conversation_id, content } = req.body;
+  const { id } = req.user;
+  if (!conversation_id || !content) {
+    return res.status(400).json({ message: "All fields are required" });
   }
-  const { receiver_id, content, isRead } = req.body;
   try {
-    const sender_id = jwt.verify(token, process.env.JWT_SECRET).userId;
-    if (!sender_id) {
-      return res.status(401).json({ message: "Unauthorized" });
-    }
-    const message = await sendMessage({
-      sender_id,
-      receiver_id,
+    const message = await createMessage({
+      sender_id: id,
+      conversation_id,
       content,
-      isRead,
     });
     if (!message) {
-      return res.status(400).json({ message: "Message sending failed" });
+      return res.status(404).json({ message: "Message not found" });
     }
+    
     res.status(201).json(message);
   } catch (error) {
     console.error("Error sending message:", error);

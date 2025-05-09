@@ -1,24 +1,66 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import { getCookie } from '../../utils/cookie';
-import { setUser } from './authSlice';
-import { createAction } from '@reduxjs/toolkit';
+import { RootState } from '../store';
+import { refreshToken, setUser } from './authSlice';
 
 
-const setUserData = createAction("setUser")
+const baseQuery = fetchBaseQuery({
+	baseUrl: import.meta.env.VITE_API_URL,
+	prepareHeaders: (headers) => {
+	  const token = getCookie("access_token");
+	  if (token) {
+		headers.set("Authorization", `Bearer ${token}`);
+	  }
+	  return headers;
+	},
+  })
+
+  const baseQueryWithReauth = async (
+	args,
+	api,
+	extraOptions
+  ) => {
+	let result = await baseQuery(args, api, extraOptions);
+
+	if (result.error && result.error.status === 401) {
+		const refresh_token = (api.getState() as RootState).auth.refresh_token;
+  
+	  if (refresh_token) {
+		const refreshResult = await baseQuery(
+		  {
+			url: '/auth/refresh-token',
+			method: 'POST',
+			body: { refresh_token },
+		  },
+		  api,
+		  extraOptions
+		);
+  
+		if (refreshResult.data) {
+		  // Yeni tokenları kaydet
+		  const newTokens = refreshResult.data
+		  api.dispatch(refreshToken(newTokens)); // Yeni tokenları Redux state'ine kaydet
+  
+		  // Orijinal isteği yeniden gönder
+		  result = await baseQuery(args, api, extraOptions);
+		} else {
+		  // Token yenileme başarısızsa kullanıcıyı logout yap
+		//   api.dispatch(logout());+
+		}
+	  } else {
+		// Refresh token yoksa logout yap
+		// api.dispatch(logout());
+	  }
+	}
+  
+	return result;
+  };
+
 
 
 export const api = createApi({
   reducerPath: 'api',
-  baseQuery:fetchBaseQuery({
-	  baseUrl: import.meta.env.VITE_API_URL,
-	  prepareHeaders: (headers) => {
-		const token = getCookie("access_token");
-		if (token) {
-		  headers.set("Authorization", `Bearer ${token}`);
-		}
-		return headers;
-	  },
-	}),
+  baseQuery: baseQueryWithReauth,
   endpoints: (builder) => ({
 	Register:builder.mutation({
 	query:(user)=>({
@@ -39,14 +81,15 @@ export const api = createApi({
 			url:'auth/me',
 			method:'GET',
 		}),
-		async onQueryStarted(_arg,{dispatch,queryFulfilled}){
+		async onQueryStarted(arg, { dispatch, queryFulfilled }) {
 			try {
-				const {data} = queryFulfilled;
-				dispatch(setUserData(data))
+				const { data } = await queryFulfilled;
+				dispatch(setUser(data));
 			} catch (error) {
-				console.log(error)
+				console.log(error);
 			}
-		},
+		}
+		
 		
   }),
  	 GetUsers:builder.query({

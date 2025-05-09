@@ -7,6 +7,8 @@ const sequelize = require("./database/db");
 const authRoute = require("./routes/authRoute");
 const usersRoute = require("./routes/usersRoute");
 const messageRoute = require("./routes/messageRoute");
+const conversationRoute = require("./routes/conversationRoute");
+const authenticateJWT = require("./middleware/jwt");
 const socketHandler = require("./socket");
 const bodyParser = require("body-parser");
 
@@ -17,12 +19,13 @@ app.use(cors());
 app.use(express.json());
 
 app.use("/auth", authRoute);
+app.use("/conversation", authenticateJWT, conversationRoute);
+app.use(authenticateJWT);
 app.use("/users", usersRoute);
 app.use("/messages", messageRoute);
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-
 
 const server = http.createServer(app);
 const io = new Server(server, {

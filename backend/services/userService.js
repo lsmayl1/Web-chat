@@ -13,7 +13,7 @@ const getById = async (id) => {
   try {
     const user = await Users.findOne({
       where: {
-        user_id: id,
+        id: id,
       },
     });
     return user;

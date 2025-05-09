@@ -7,23 +7,25 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "buildnt": "vite build",
-
     "lint": "eslint .",
     "preview": "vite preview"
   },
   "dependencies": {
+    "@hookform/resolvers": "^5.0.1",
     "@reduxjs/toolkit": "^2.7.0",
     "@tailwindcss/vite": "^4.1.5",
     "@types/socket.io-client": "^1.4.36",
     "axios": "^1.9.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "react-hook-form": "^7.56.3",
     "react-redux": "^9.2.0",
     "react-router-dom": "^7.5.3",
     "react-toastify": "^11.0.5",
     "socket.io-client": "^4.8.1",
     "tailwindcss": "^4.1.5",
-    "toastify": "^2.0.1"
+    "toastify": "^2.0.1",
+    "yup": "^1.6.1"
   },
   "devDependencies": {
     "@eslint/js": "^9.22.0",

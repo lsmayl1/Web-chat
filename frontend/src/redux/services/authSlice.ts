@@ -40,6 +40,12 @@ const AuthSlice = createSlice({
 
 
 		},
+		refreshToken:(state,action)=>{
+			state.access_token = action.payload.access_token;
+			state.refresh_token = action.payload.refresh_token;
+			saveTokensToCookie(action.payload.access_token,action.payload.refresh_token)
+			state.isLoading = false
+		},
 		setUser:(state,action)=>{
 			state.user = action.payload
 			state.user_role = action.payload.role
@@ -54,9 +60,8 @@ const AuthSlice = createSlice({
 
 		},
 
-	
 	}
 })
 
-export const {setToken,logout,setUser} = AuthSlice.actions;
+export const {setToken,logout,setUser,refreshToken} = AuthSlice.actions;
 export default AuthSlice.reducer; // AuthSlice.reducer, authSlice.actions

@@ -5,26 +5,26 @@ const Messages = sequelize.define(
   "Messages",
   {
     id: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.UUID,
+      defaultValue: DataTypes.UUIDV4,
       primaryKey: true,
-      autoIncrement: true,
       allowNull: false,
     },
     content: {
       type: DataTypes.TEXT,
       allowNull: false,
     },
-    senderId: {
-      type: DataTypes.INTEGER,
+    sender_id: {
+      type: DataTypes.UUID,
       allowNull: false,
     },
-    receiverId: {
-      type: DataTypes.INTEGER,
-      allowNull: true, // Grup mesajları için null olabilir
+    sent_at: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: DataTypes.NOW,
     },
-    isRead: {
-      type: DataTypes.BOOLEAN,
-      defaultValue: false,
+    conversation_id: {
+      type: DataTypes.UUID,
       allowNull: false,
     },
     createdAt: {

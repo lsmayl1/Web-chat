@@ -1,8 +1,10 @@
-import React, { useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import { useRegisterMutation } from "../redux/services/api";
-import { FormErrors, RegisterDto } from "../types";
+import { RegisterDto } from "../types";
+import { useForm } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import { shema } from "../Schemas/schema";
 
 export interface Error {
   data: {
@@ -10,81 +12,22 @@ export interface Error {
   };
 }
 export const SignUp = () => {
-  const [register, { isLoading, isSuccess }] = useRegisterMutation();
+  const [registerMutation, { isLoading, isSuccess }] = useRegisterMutation();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm({ resolver: yupResolver(shema) });
   const navigate = useNavigate();
-  const [formErrors, setFormErrors] = useState<FormErrors>({});
-  const [confirm_password, setConfirm_password] = useState("");
-  const [form, setForm] = useState<RegisterDto>({
-    email: "",
-    username: "",
-    first_name: "",
-    last_name: "",
-    password: "",
-  });
-  const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setForm((prevForm) => ({
-      ...prevForm,
-      [name]: value,
-    }));
-  };
 
-  const validateForm = () => {
-    const newErrors: FormErrors = {};
-
-    // Kullanıcı adı validasyonu
-    if (!form.username) {
-      newErrors.username = "İstifadəçi adı mütləqdir.";
-    } else if (form.username.length < 3) {
-      newErrors.username = "İstifadəçi adı ən az 3 simvol olmalıdır.";
-    }
-
-    if (!form.first_name) {
-      newErrors.first_name = "Ad mütləqdir.";
-    } else if (form.first_name.length < 2) {
-      newErrors.first_name = "Ad ən az 2 simvol olmalıdır.";
-    }
-    if (!form.last_name) {
-      newErrors.last_name = "Soyad mütləqdir.";
-    }
-
-    // E-posta validasyonu
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!form.email) {
-      newErrors.email = "E-poçt ünvanı mütləqdir";
-    } else if (!emailRegex.test(form.email)) {
-      newErrors.email = "Xahiş edirik, düzgün e-poçt ünvanı daxil edin.";
-    }
-
-    // Şifre validasyonu
-    if (!form.password) {
-      newErrors.password = "Şifrə mütləqdir.";
-    } else if (form.password.length < 6) {
-      newErrors.password = "Şifrə ən az 6 simvol olmalıdır.";
-    }
-    if (!confirm_password) {
-      newErrors.confirm_password = "Şifrə təkrarı mütləqdir.";
-    } else if (confirm_password !== form.password) {
-      newErrors.confirm_password = "Şifrələr uyğun gəlmir.";
-    }
-
-    return newErrors;
-  };
-
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const validationErrors = validateForm();
-    setFormErrors(validationErrors);
-
-    if (Object.keys(validationErrors).length === 0) {
-      try {
-        await register(form).unwrap();
-        navigate("/sign-in");
-      } catch (err: unknown) {
-        if (err && typeof err === "object" && "data" in err) {
-          const myErr = err as Error;
-          toast.error(myErr.data.message);
-        }
+  const onSubmit = async (data: RegisterDto) => {
+    try {
+      await registerMutation(data).unwrap();
+      navigate("/sign-in");
+    } catch (err: unknown) {
+      if (err && typeof err === "object" && "data" in err) {
+        const myErr = err as Error;
+        toast.error(myErr.data.message);
       }
     }
   };
@@ -123,7 +66,7 @@ export const SignUp = () => {
             </h1>
           </div>
           <form
-            onSubmit={handleSubmit}
+            onSubmit={handleSubmit(onSubmit)}
             action=""
             className="w-9/12 flex flex-col gap-2"
           >
@@ -133,30 +76,24 @@ export const SignUp = () => {
                   First name
                 </label>
                 <input
-                  name="first_name"
-                  onChange={onChange}
+                  {...register("first_name")}
                   type="text"
                   placeholder="Enter your name"
                   className="border rounded-md border-gray-300 w-full px-2 py-2  focus:outline-blue-500"
                 />
-                {formErrors.first_name && (
-                  <span style={{ color: "red" }}>{formErrors.first_name}</span>
-                )}
+                <p>{errors.first_name?.message}</p>
               </div>
               <div className="flex flex-col w-full">
                 <label htmlFor="last_name" className="text-gray-700">
                   Last name
                 </label>
                 <input
-                  name="last_name"
-                  onChange={onChange}
+                  {...register("last_name")}
                   type="text"
                   placeholder="Enter your name"
                   className="border rounded-md border-gray-300 w-full px-2 py-2 focus:outline-blue-500"
                 />
-                {formErrors.last_name && (
-                  <span style={{ color: "red" }}>{formErrors.last_name}</span>
-                )}
+                <p>{errors.last_name?.message}</p>
               </div>
             </div>
             <div>
@@ -164,62 +101,49 @@ export const SignUp = () => {
                 Username
               </label>
               <input
-                name="username"
-                onChange={onChange}
+                {...register("username")}
                 type="text"
                 placeholder="Enter your username"
                 className="border rounded-md border-gray-300 w-full px-2 py-2 focus:outline-blue-500"
               />
-              {formErrors.username && (
-                <span style={{ color: "red" }}>{formErrors.username}</span>
-              )}
+              <p>{errors.username?.message}</p>
             </div>
             <div>
               <label htmlFor="email" className="text-gray-700">
                 Email
               </label>
               <input
-                name="email"
                 type="text"
-                onChange={onChange}
+                {...register("email")}
                 placeholder="Enter your email "
                 className="border rounded-md border-gray-300 w-full px-2 py-2 focus:outline-blue-500"
               />
-              {formErrors.email && (
-                <span style={{ color: "red" }}>{formErrors.email}</span>
-              )}
+              <p>{errors.email?.message}</p>
             </div>
             <div>
               <label htmlFor="password" className="text-gray-700">
                 Password
               </label>
               <input
-                onChange={onChange}
+                {...register("password")}
                 name="password"
                 type="text"
                 placeholder="Enter your password"
                 className="border rounded-md border-gray-300 w-full px-2 py-2 focus:outline-blue-500"
               />
-              {formErrors.password && (
-                <span style={{ color: "red" }}>{formErrors.password}</span>
-              )}
+              <p>{errors.password?.message}</p>
             </div>
             <div>
               <label htmlFor="confirm_password" className="text-gray-700">
                 Confirm password
               </label>
               <input
-                name="confirm_password"
                 type="text"
-                onChange={(e) => setConfirm_password(e.target.value)}
+                {...register("confirm_password")}
                 placeholder="Confirm your password"
                 className="border rounded-md border-gray-300 w-full px-2 py-2 focus:outline-blue-500"
               />
-              {formErrors.confirm_password && (
-                <span style={{ color: "red" }}>
-                  {formErrors.confirm_password}
-                </span>
-              )}
+              <p>{errors.confirm_password?.message}</p>
             </div>
             <button
               type="submit"

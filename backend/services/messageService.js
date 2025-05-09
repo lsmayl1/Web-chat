@@ -1,4 +1,4 @@
-const { Messages, Users } = require("../models");
+const { Messages, Users, Conversation } = require("../models");
 
 const sendMessage = async ({ sender_id, receiver_id, content, isRead }) => {
   if (!sender_id || !receiver_id || !content || !isRead) {
@@ -80,8 +80,67 @@ const getMessagesByChatId = async (chatId) => {
   }
 };
 
+const getLastMessageByConversationId = async (conversationId) => {
+  if (!conversationId) {
+    const error = new Error("Conversation ID is required");
+    error.statusCode = 400;
+    throw error;
+  }
+  try {
+    const conversation = await Conversation.findOne({
+      where: {
+        id: conversationId,
+      },
+      include: [
+        {
+          model: Messages,
+          as: "messages",
+          order: [["createdAt", "DESC"]],
+          limit: 1,
+        },
+      ],
+    });
+    if (!conversation) {
+      const error = new Error("Conversation not found");
+      error.statusCode = 404;
+      throw error;
+    }
+    const lastMessage = conversation.messages[0];
+    if (!lastMessage) {
+      const error = new Error("No messages found in this conversation");
+      error.statusCode = 404;
+      throw error;
+    }
+    return lastMessage;
+  } catch (error) {
+    console.error("Error fetching last message by conversation ID:", error);
+    throw error;
+  }
+};
+
+const createMessage = async (conversationId, senderId, content) => {
+  if (!conversationId || !senderId || !content) {
+    const error = new Error("All fields are required");
+    error.statusCode = 400;
+    throw error;
+  }
+  try {
+    const message = await Messages.create({
+      conversationId,
+      senderId,
+      content,
+    });
+    return message;
+  } catch (error) {
+    console.error("Error creating message by conversation ID:", error);
+    throw error;
+  }
+};
+
 module.exports = {
+  createMessage,
   sendMessage,
   getMessagesByChatId,
   getMessagesByReceiverId,
+  getLastMessageByConversationId,
 };

@@ -21,17 +21,9 @@ module.exports = (io) => {
         socket.emit("error", { message: "Geçersiz token." });
         return socket.disconnect(true);
       }
-      io.emit("success", { message: "Sockete baglandi" }); // Kullanıcı bağlandığında tüm kullanıcılara bildirim gönder
-
+      io.emit("success", { message: "Sockete baglandi" });
       socket.user = { id: userId };
 
-      // Kendi user room'una katılır
-      const roomName = `user:${userId}`;
-      socket.join(roomName);
-
-      console.log("Kullanıcı doğrulandı. Odaya katıldı:", roomName);
-
-      // Chat olaylarını dinle
       ChatSocket(io, socket);
 
       socket.on("disconnect", () => {

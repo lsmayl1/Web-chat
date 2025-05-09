@@ -1,10 +1,14 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import { useLoginMutation, useMeQuery } from "../redux/services/api";
-import { FormErrors, LoginDto } from "../types";
 import { useDispatch } from "react-redux";
 import { setToken, setUser } from "../redux/services/authSlice";
+import { useForm } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import { shema } from "../Schemas/schema";
+
+const loginShema = shema.pick(["username", "password"]);
 
 export interface Error {
   data: {
@@ -16,60 +20,25 @@ export const SignIn = () => {
   const { data } = useMeQuery(undefined, {
     skip: !isSuccess,
   });
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm({ resolver: yupResolver(loginShema) });
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const [formErrors, setFormErrors] = useState<FormErrors>({});
-  const [form, setForm] = useState<LoginDto>({
-    username: "",
-    password: "",
-  });
-  const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setForm((prevForm) => ({
-      ...prevForm,
-      [name]: value,
-    }));
-  };
 
-  const validateForm = () => {
-    const newErrors: FormErrors = {};
-
-    // Kullanıcı adı validasyonu
-    if (!form.username) {
-      newErrors.username = "İstifadəçi adı mütləqdir.";
-    } else if (form.username.length < 3) {
-      newErrors.username = "İstifadəçi adı ən az 3 simvol olmalıdır.";
-    }
-
-    // E-posta validasyonu
-
-    // Şifre validasyonu
-    if (!form.password) {
-      newErrors.password = "Şifrə mütləqdir.";
-    } else if (form.password.length < 6) {
-      newErrors.password = "Şifrə ən az 6 simvol olmalıdır.";
-    }
-
-    return newErrors;
-  };
-
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const validationErrors = validateForm();
-    setFormErrors(validationErrors);
-
-    if (Object.keys(validationErrors).length === 0) {
-      try {
-        const res = await login(form).unwrap();
-        if (res) {
-          dispatch(setToken(res));
-        }
-      } catch (err: unknown) {
-        if (err && typeof err === "object" && "data" in err) {
-          const myErr = err as Error;
-          toast.error(myErr.data.message);
-        }
+  const onSubmit = async (data) => {
+    try {
+      const res = await login(data).unwrap();
+      if (res) {
+        dispatch(setToken(res));
+      }
+    } catch (err: unknown) {
+      if (err && typeof err === "object" && "data" in err) {
+        const myErr = err as Error;
+        toast.error(myErr.data.message);
       }
     }
   };
@@ -117,7 +86,7 @@ export const SignIn = () => {
             </h1>
           </div>
           <form
-            onSubmit={handleSubmit}
+            onSubmit={handleSubmit(onSubmit)}
             action=""
             className="w-9/12 flex flex-col gap-4"
           >
@@ -126,30 +95,25 @@ export const SignIn = () => {
                 Username
               </label>
               <input
-                name="username"
-                onChange={onChange}
+                {...register("username")}
                 type="text"
                 placeholder="Enter your username"
                 className="border rounded-md border-gray-300 w-full px-2 py-2 focus:outline-blue-500"
               />
-              {formErrors.username && (
-                <span style={{ color: "red" }}>{formErrors.username}</span>
-              )}
+              <p>{errors.username?.message}</p>
             </div>
             <div>
               <label htmlFor="password" className="text-gray-700">
                 Password
               </label>
               <input
-                onChange={onChange}
+                {...register("password")}
                 name="password"
                 type="text"
                 placeholder="Enter your password"
                 className="border rounded-md border-gray-300 w-full px-2 py-2 focus:outline-blue-500"
               />
-              {formErrors.password && (
-                <span style={{ color: "red" }}>{formErrors.password}</span>
-              )}
+              <p>{errors.password?.message}</p>
             </div>
             <button
               type="submit"

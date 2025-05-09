@@ -1,48 +1,58 @@
 const { Sequelize, Op } = require("sequelize");
 const sequelize = require("../database/db"); // Veritabanı bağlantısı
+
 const Users = require("./Users");
 const Messages = require("./Messages");
-const Conversation = require("./Conversation");
+const Conversations = require("./Conversations");
+const Conversations_participants = require("./Conversations_participants");
+
+// Define relationships
+Users.belongsToMany(Conversations, {
+  through: Conversations_participants,
+  foreignKey: "user_id",
+  otherKey: "conversation_id",
+  as: "conversations",
+});
+
+Conversations.belongsToMany(Users, {
+  through: Conversations_participants,
+  foreignKey: "conversation_id",
+  otherKey: "user_id",
+  as: "participants",
+});
+
+Conversations.hasMany(Messages, {
+  foreignKey: "conversation_id",
+  as: "messages",
+});
+
+Messages.belongsTo(Conversations, {
+  foreignKey: "conversation_id",
+  as: "conversation",
+});
+
+Conversations.belongsTo(Messages, {
+  foreignKey: "last_message_id",
+  as: "lastMessage",
+  targetKey: "id", // Explicitly specify the target key
+});
 
 Users.hasMany(Messages, {
-  foreignKey: "senderId",
-  as: "sentMessages",
-});
-Users.hasMany(Messages, {
-  foreignKey: "receiverId",
-  as: "receivedMessages",
+  foreignKey: "sender_id",
+  as: "messages",
 });
 
 Messages.belongsTo(Users, {
-  foreignKey: "senderId",
+  foreignKey: "sender_id",
   as: "sender",
 });
-Messages.belongsTo(Users, {
-  foreignKey: "receiverId",
-  as: "receiver",
-});
-
-// Conversation.belongsTo(Users, {
-//   foreignKey: "userOneId",
-//   as: "userOne",
-// });
-
-// Conversation.belongsTo(Users, {
-//   foreignKey: "userTwoId",
-//   as: "userTwo",
-// });
-
-
-// Conversation.belongsTo(Messages, {
-//   foreignKey: "lastMessage",
-//   as: "lastMessageDetails",
-// });
 
 module.exports = {
   sequelize,
   Sequelize,
   Messages,
   Users,
-  Conversation,
+  Conversations_participants,
+  Conversations,
   Op,
 };
