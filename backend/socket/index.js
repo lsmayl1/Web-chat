@@ -14,7 +14,7 @@ module.exports = (io) => {
 
     try {
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
-      const userId = decoded.userId;
+      const userId = decoded.user_id;
 
       if (!userId) {
         console.log("Geçersiz token içeriği.");

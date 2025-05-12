@@ -1,13 +1,13 @@
-import  { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "../redux/store";
 import createSocket from "../socket/socket";
 import { RequestMessageDto, ResponseMessageDto } from "../types";
-import  { Socket } from "socket.io-client";
-import  { ClientToServerEvents, ServerToClientEvents } from "../SocketEvents";
+import { Socket } from "socket.io-client";
+import { ClientToServerEvents, ServerToClientEvents } from "../SocketEvents";
 export const useSocket = () => {
-  const { access_token } = useSelector((state: RootState) => state.auth);
-  const socketRef = useRef<typeof Socket<ServerToClientEvents, ClientToServerEvents> | null>(null);
+  const { access_token, user } = useSelector((state: RootState) => state.auth);
+  const socketRef = useRef(null);
   useEffect(() => {
     if (access_token) {
       const newSocket = createSocket(access_token);
@@ -26,13 +26,26 @@ export const useSocket = () => {
     socketRef.current?.on("error", callback);
   };
   //Get messsages
-  const GetMessages = (
-    receiverId: string,
-    callback: (messages: ResponseMessageDto[]) => void
+  const joinConversation = (
+    conversationId: string,
+    callback: (data: any) => void
+  ) => {
+    socketRef.current?.emit("joinConversation", conversationId, callback);
+  };
+  const getMyConversations = (callback: (data) => void) => {
+    socketRef.current?.emit("getMyConversations", callback);
+  };
+  const updateMyConversations = (callback: (data) => void) => {
+    socketRef.current?.on("updateConversations", callback);
+  };
+
+  const getConversation = (
+    conversation_id: string,
+    callback: (messages) => void
   ) => {
     socketRef.current?.emit(
-      "getMessagesWithUser",
-      { receiverId },
+      "getConversation",
+      { conversation_id },
       (response) => {
         if (response.success) {
           callback(response);
@@ -42,7 +55,7 @@ export const useSocket = () => {
       }
     );
   };
-  const SendMessage = (request, callback: (message:RequestMessageDto) => void) => {
+  const SendMessage = (request, callback: (message) => void) => {
     socketRef.current?.emit("sendMessage", request, (response) => {
       if (response.success) {
         callback(response.message);
@@ -51,9 +64,19 @@ export const useSocket = () => {
       }
     });
   };
-  const receiveMessage = (callback: (data:ResponseMessageDto) => void) => {
+  const receiveMessage = (callback: (data) => void) => {
     socketRef.current?.on("receiveMessage", callback);
   };
 
-  return { onSuccess, onError, GetMessages, SendMessage, receiveMessage };
+  return {
+    onSuccess,
+    onError,
+    getConversation,
+    SendMessage,
+    receiveMessage,
+    joinConversation,
+    getMyConversations,
+    updateMyConversations,
+    socketRef,
+  };
 };

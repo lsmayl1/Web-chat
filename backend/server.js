@@ -11,18 +11,20 @@ const conversationRoute = require("./routes/conversationRoute");
 const authenticateJWT = require("./middleware/jwt");
 const socketHandler = require("./socket");
 const bodyParser = require("body-parser");
+const path = require("path");
 
 const app = express();
 
+// uploads klasörünü public olarak servis et
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 // Middleware
 app.use(cors());
 app.use(express.json());
 
 app.use("/auth", authRoute);
 app.use("/conversation", authenticateJWT, conversationRoute);
-app.use(authenticateJWT);
-app.use("/users", usersRoute);
-app.use("/messages", messageRoute);
+app.use("/users", authenticateJWT, usersRoute);
+app.use("/messages", authenticateJWT, messageRoute);
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));

@@ -7,13 +7,22 @@ import { SendIcon } from "../../assets/SendIcon";
 import { toast, ToastContainer } from "react-toastify";
 import { LeftArrow } from "../../assets/LeftArrow";
 import { useSocket } from "../../hooks/useSocket";
+import { useGetMessagesQuery } from "../../redux/services/api";
 export const ChatList: React.FC = () => {
   const { id } = useParams();
   const { user } = useSelector((state: RootState) => state.auth);
-  const [data, setData] = useState<ResponseMessageDto | null>(null);
+  const [data, setData] = useState(null);
   const scrollRef = useRef<HTMLDivElement | null>(null);
-  const { onSuccess, onError, SendMessage, receiveMessage, GetMessages } =
-    useSocket();
+  const {
+    onSuccess,
+    onError,
+    SendMessage,
+    receiveMessage,
+    getConversation,
+    joinConversation,
+    getMyConversations,
+  } = useSocket();
+
   const [messageForm, setMessageForm] = useState({
     receiver_id: id,
     content: "",
@@ -22,7 +31,10 @@ export const ChatList: React.FC = () => {
 
   useEffect(() => {
     if (id) {
-      GetMessages(id, (data) => {
+      joinConversation(id, (data) => {
+        console.log(data);
+      });
+      getConversation(id, (data) => {
         setData(data);
       });
     }
@@ -46,28 +58,25 @@ export const ChatList: React.FC = () => {
         setData((prev) => {
           return {
             ...prev,
-            messages: [...prev.messages, data],
+            conversation: {
+              ...prev.conversation,
+              messages: [...(prev.conversation?.messages || []), data],
+            },
           };
         });
       });
       setMessageForm({ receiver_id: id, content: "", isRead: true });
     }
-  }, [id]);
+  }, [id]); // Include receiveMessage in the dependency array
 
   const handleSendMessage = () => {
     if (id) {
-      SendMessage({ receiverId: id, content: messageForm.content }, (data) => {
-        console.log(data);
-        setData((prev) => {
-          if (!prev) return null; // veya başlangıç verisi
-
-          return {
-            ...prev,
-            messages: [...prev.messages, data],
-          };
-        });
-        setMessageForm((prev) => ({ ...prev, content: "" }));
-      });
+      SendMessage(
+        { conversation_id: id, content: messageForm.content },
+        (data) => {
+          setMessageForm((prev) => ({ ...prev, content: "" }));
+        }
+      );
     }
   };
 
@@ -79,32 +88,43 @@ export const ChatList: React.FC = () => {
           !id && "max-md:hidden"
         } `}
       >
-        <div className="h-1/10 max-md:h-1/16  flex items-center px-4 gap-4  bg-mainBg">
+        <div className="h-1/12 max-md:h-1/16  flex items-center px-4 gap-4  bg-mainBg">
           <NavLink to={"/chat"} className={"md:hidden flex items-center "}>
             <LeftArrow className={"size-6"} />{" "}
           </NavLink>
+
+          <div className="size-14 max-lg:size-10  overflow-hidden aspect-square rounded-full flex items-center justify-center">
+            <img
+              src={`${import.meta.env.VITE_API_URL}/uploads/default.png`}
+              className="w-full h-full object-cover "
+              alt=""
+            />
+          </div>
           <span className="text-2xl font-medium text-white ">
-            {data?.user?.username}
+            {data?.conversation?.user?.username}
           </span>
         </div>
         <div
           ref={scrollRef}
           className="flex-1  flex flex-col h-[60%] overflow-y-auto"
         >
-          <ul className=" flex h-full flex-col gap-0 w-full">
-            {data?.messages?.map((message, index) => (
+          <ul className=" flex h-full flex-col gap-0 w-full py-4">
+            {data?.conversation?.messages?.length === 0 && (
+              <span className="text-white">Messages not found</span>
+            )}
+            {data?.conversation?.messages?.map((message, index) => (
               <div
                 key={index}
                 className={`flex ${
-                  message?.senderId === user?.user_id
+                  message?.sender_id === user?.id
                     ? "justify-end"
                     : "justify-start"
-                }  px-4`}
+                }  px-1`}
               >
                 <li className="flex flex-col  w-fit px-2 py-0.5 justify-end">
                   <div
                     className={`flex gap-2 flex-col  ${
-                      message?.senderId === user?.user_id
+                      message?.sender_id === user?.id
                         ? "bg-senderMessageBg"
                         : "bg-receiverMessageBg"
                     }  px-4 rounded-2xl py-2`}
@@ -114,7 +134,7 @@ export const ChatList: React.FC = () => {
                         {message.content}
                       </p>
                       <span className="text-white text-end items-end flex text-xs">
-                        {new Date(message.createdAt).toLocaleTimeString(
+                        {new Date(message?.sent_at).toLocaleTimeString(
                           "en-US",
                           {
                             hour: "2-digit",

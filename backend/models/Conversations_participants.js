@@ -12,7 +12,7 @@ const Conversations_participants = sequelize.define(
       type: DataTypes.UUID,
       allowNull: false,
     },
-    undread_count: {
+    unread_count: {
       type: DataTypes.INTEGER,
       allowNull: false,
       defaultValue: 0,

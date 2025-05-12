@@ -30,13 +30,13 @@ function App() {
         <Route path="/sign-in" element={<SignIn />} />
       </Route>
 
-      <Route element={<PrivateRoute allowedRoles={["Admin", "user"]} />}>
-        <Route element={<Layout />}>
-          <Route path="/chat" element={<Chat />}>
-            <Route path=":id" element={<ChatList />} />
-          </Route>
+      {/* <Route element={<PrivateRoute allowedRoles={["Admin", "user"]} />}> */}
+      <Route element={<Layout />}>
+        <Route path="/chat" element={<Chat />}>
+          <Route path=":id" element={<ChatList />} />
         </Route>
       </Route>
+      {/* </Route> */}
     </Routes>
   );
 }

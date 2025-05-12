@@ -92,9 +92,9 @@ export const api = createApi({
 		
 		
   }),
- 	 GetUsers:builder.query({
+ 	 GetConverstations:builder.query({
 		query:()=>({
-		url:'/users/withoutme',
+		url:'/conversation/my',
 		method:'GET',
 	})
 	}),
@@ -106,10 +106,9 @@ export const api = createApi({
 			body:message,
 		})
 	}),
-
 	GetMessages:builder.query({
 		query:(id)=>({
-			url:`/messages/${id}`,
+			url:`/conversation/${id}`,
 			method:'GET',
 		})
 	}),
@@ -117,4 +116,7 @@ export const api = createApi({
 })
 });
 
-export const { useLoginMutation,useRegisterMutation,useMeQuery,useGetUsersQuery,useSendMessageMutation} = api;
+export const { useLoginMutation,useRegisterMutation,useMeQuery,useGetConverstationsQuery,useSendMessageMutation,
+useGetMessagesQuery
+
+} = api;
