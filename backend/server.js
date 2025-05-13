@@ -15,9 +15,7 @@ const path = require("path");
 
 const app = express();
 
-// uploads klasörünü public olarak servis et
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
-// Middleware
 app.use(cors());
 app.use(express.json());
 
@@ -38,7 +36,6 @@ const io = new Server(server, {
 });
 
 app.use((err, req, res, next) => {
-  // Eğer hata özel bir statusCode içeriyorsa, onu kullan
   const statusCode = err.statusCode || 500;
   const message = err.message || "Internal server error";
 

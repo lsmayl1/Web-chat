@@ -34,7 +34,7 @@ Messages.belongsTo(Conversations, {
 Conversations.belongsTo(Messages, {
   foreignKey: "last_message_id",
   as: "lastMessage",
-  targetKey: "id", // Explicitly specify the target key
+  targetKey: "id", 
 });
 
 Users.hasMany(Messages, {

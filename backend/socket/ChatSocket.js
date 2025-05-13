@@ -73,11 +73,11 @@ module.exports = (io, socket) => {
       }
 
       const room = `conversation_${conversation_id}`;
-      io.to(room).emit("receiveMessage", message); // Emit to all users in the room
+      io.to(room).emit("receiveMessage", message);
 
       const updatedConversations = await getMyConversations(socket.user.id);
       if (updatedConversations) {
-        io.to(room).emit("updateConversations", updatedConversations); // Emit updated conversations to all users in the room
+        io.to(room).emit("updateConversations", updatedConversations); 
       }
 
       callback({ success: true, message });

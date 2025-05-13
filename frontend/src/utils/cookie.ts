@@ -13,7 +13,6 @@ export const saveTokenToCookie = (token:string) => {
 
   document.cookie = `access_token=${token}; expires=${expires.toUTCString()}; path=/`;
 };
-// Cookie'den token silme
 export const deleteTokenFromCookie = () => {
   document.cookie =
 	"access_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/";

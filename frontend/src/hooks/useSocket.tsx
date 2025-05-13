@@ -5,13 +5,19 @@ import createSocket from "../socket/socket";
 import { RequestMessageDto, ResponseMessageDto } from "../types";
 import { Socket } from "socket.io-client";
 import { ClientToServerEvents, ServerToClientEvents } from "../SocketEvents";
+
 export const useSocket = () => {
-  const { access_token, user } = useSelector((state: RootState) => state.auth);
+  const { access_token } = useSelector((state: RootState) => state.auth);
   const socketRef = useRef(null);
+
   useEffect(() => {
     if (access_token) {
       const newSocket = createSocket(access_token);
-      socketRef.current = newSocket;
+      if (newSocket) {
+        // newSocket.on('success', onSuccess);
+        // newSocket.on('error', onError);
+        socketRef.current = newSocket;
+      }
       return () => {
         newSocket.disconnect();
         socketRef.current = null;
@@ -19,12 +25,6 @@ export const useSocket = () => {
     }
   }, [access_token]);
 
-  const onSuccess = (callback: (data: any) => void) => {
-    socketRef.current?.on("success", callback);
-  };
-  const onError = (callback: (data: any) => void) => {
-    socketRef.current?.on("error", callback);
-  };
   //Get messsages
   const joinConversation = (
     conversationId: string,
@@ -32,9 +32,11 @@ export const useSocket = () => {
   ) => {
     socketRef.current?.emit("joinConversation", conversationId, callback);
   };
+  
   const getMyConversations = (callback: (data) => void) => {
     socketRef.current?.emit("getMyConversations", callback);
   };
+
   const updateMyConversations = (callback: (data) => void) => {
     socketRef.current?.on("updateConversations", callback);
   };
@@ -55,6 +57,7 @@ export const useSocket = () => {
       }
     );
   };
+
   const SendMessage = (request, callback: (message) => void) => {
     socketRef.current?.emit("sendMessage", request, (response) => {
       if (response.success) {
@@ -64,13 +67,12 @@ export const useSocket = () => {
       }
     });
   };
+
   const receiveMessage = (callback: (data) => void) => {
     socketRef.current?.on("receiveMessage", callback);
   };
 
   return {
-    onSuccess,
-    onError,
     getConversation,
     SendMessage,
     receiveMessage,

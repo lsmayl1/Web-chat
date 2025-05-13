@@ -5,7 +5,7 @@ import { RootState } from "../../redux/store";
 export const Chat = () => {
   const { id } = useParams();
   const { user } = useSelector((state: RootState) => state.auth);
-
+ 
   return id ? (
     <Outlet />
   ) : (

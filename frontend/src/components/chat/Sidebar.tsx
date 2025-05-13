@@ -25,7 +25,6 @@ export const Sidebar = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // İlk konuşmaları çek
     getMyConversations((res) => {
       if (res.success) {
         setConversations(res.conversations);
@@ -35,11 +34,9 @@ export const Sidebar = () => {
 
   useEffect(() => {
     const handleUpdate = (updatedData) => {
-      // Backend tüm konuşma listesini gönderiyorsa direkt set
       if (Array.isArray(updatedData)) {
         setConversations(updatedData);
       } else {
-        // Tek bir konuşma güncellendiyse, eski listeyi güncelle
         setConversations((prev) => {
           const index = prev.findIndex((c) => c.id === updatedData.id);
           if (index !== -1) {
@@ -55,7 +52,6 @@ export const Sidebar = () => {
 
     updateMyConversations(handleUpdate);
 
-    // Temizlik
     return () => {
       socketRef.current?.off("updateMyConversations", handleUpdate);
     };

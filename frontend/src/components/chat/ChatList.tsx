@@ -14,14 +14,22 @@ export const ChatList: React.FC = () => {
   const [data, setData] = useState(null);
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const {
-    onSuccess,
-    onError,
     SendMessage,
     receiveMessage,
     getConversation,
     joinConversation,
     getMyConversations,
-  } = useSocket();
+  } = useSocket(
+  //   {
+  //   onSuccess: (data) => {
+  //     console.log("success", data);
+  //   },
+  //   onError: (error) => {
+  //     console.log("error", error);
+  //   },
+
+  // }
+);
 
   const [messageForm, setMessageForm] = useState({
     receiver_id: id,
@@ -39,12 +47,6 @@ export const ChatList: React.FC = () => {
       });
     }
   }, [id]);
-
-  useEffect(() => {
-    onError((error) => {
-      toast.error(error?.message);
-    });
-  }, [onSuccess, onError, id]);
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -88,7 +90,7 @@ export const ChatList: React.FC = () => {
           !id && "max-md:hidden"
         } `}
       >
-        <div className="h-1/12 max-md:h-1/16  flex items-center px-4 gap-4  bg-mainBg">
+        <div className="h-1/10 max-md:h-1/16  flex items-center px-4 gap-4  bg-mainBg">
           <NavLink to={"/chat"} className={"md:hidden flex items-center "}>
             <LeftArrow className={"size-6"} />{" "}
           </NavLink>

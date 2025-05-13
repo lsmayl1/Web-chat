@@ -28,12 +28,10 @@ router.post("/", async (req, res) => {
     });
     res.status(201).json(user);
   } catch (error) {
-    // Eğer hata özel bir statusCode içeriyorsa, onu kullan
     if (error.statusCode) {
       return res.status(error.statusCode).json({ message: error.message });
     }
 
-    // Eğer statusCode yoksa, genel bir hata döndür
     res.status(500).json({ message: "Internal server error" });
   }
 });
@@ -51,8 +49,7 @@ router.get("/withoutme", async (req, res) => {
     }
     const users = await Users.findAll({
       where: {
-        user_id: { [Op.ne]: userId }, // Kullanıcının kendisi hariç tüm kullanıcıları getir
-      },
+        user_id: { [Op.ne]: userId },       },
     });
     if (!users || users.length === 0) {
       return res.status(404).json({ message: "No users found" });

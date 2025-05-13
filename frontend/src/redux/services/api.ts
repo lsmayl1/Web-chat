@@ -37,19 +37,11 @@ const baseQuery = fetchBaseQuery({
 		);
   
 		if (refreshResult.data) {
-		  // Yeni tokenları kaydet
 		  const newTokens = refreshResult.data
-		  api.dispatch(refreshToken(newTokens)); // Yeni tokenları Redux state'ine kaydet
+		  api.dispatch(refreshToken(newTokens));
   
-		  // Orijinal isteği yeniden gönder
 		  result = await baseQuery(args, api, extraOptions);
-		} else {
-		  // Token yenileme başarısızsa kullanıcıyı logout yap
-		//   api.dispatch(logout());+
 		}
-	  } else {
-		// Refresh token yoksa logout yap
-		// api.dispatch(logout());
 	  }
 	}
   

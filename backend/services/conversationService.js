@@ -150,8 +150,7 @@ const getConversationById = async ({ conversationId, receiverId }) => {
           },
           where: {
             id: {
-              [Op.ne]: receiverId, // Exclude the receiver from participants
-            },
+              [Op.ne]: receiverId,          },
           },
         },
       ],
@@ -193,7 +192,7 @@ const getMyConversations = async (id) => {
           attributes: ["id", "username", "avatar"],
           through: {
             model: Conversations_participants,
-            attributes: ["unread_count", "joined_at"], // Corrected typo: unread_count -> unread_count
+            attributes: ["unread_count", "joined_at"],
           },
         },
         {
@@ -215,7 +214,7 @@ const getMyConversations = async (id) => {
           user_id: user.id,
           username: user.username,
           avatar: user.avatar,
-          unread_count: user.Conversations_participants.unread_count, // Corrected typo
+          unread_count: user.Conversations_participants.unread_count,
           joined_at: user.Conversations_participants.joined_at,
         }));
 
